@@ -60,19 +60,13 @@ public class ColorPickerView extends View {
 
         colorPicker.resize(h);
 
-        Paint p = new Paint();
-        colorPicker.updateHue(p);
+        colorPicker.updateHue();
         colorPicker.updateSV();
-
-
-        int colorPanelWidth = Math.max(0, w - h);
-        colorPanelWidth = Math.min(colorPanelWidth, h/2-MARGIN);
     }
 
     boolean  onTouchDown(int ix, int iy)
     {
         return colorPicker.onTouchDown(ix, iy);
-        // handle select, answer here.
     }
 
     boolean onTouchMove(int ix, int iy)

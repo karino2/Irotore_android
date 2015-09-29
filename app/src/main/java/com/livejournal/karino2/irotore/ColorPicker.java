@@ -1,5 +1,4 @@
 package com.livejournal.karino2.irotore;
-
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -46,9 +45,14 @@ public class ColorPicker {
 
     private boolean mSlimWheel = false;
 
-    public ColorPicker() {}
+    Paint huePaint = new Paint();
+
+    public ColorPicker() {
+        this(false);
+    }
     public ColorPicker(boolean isSlimWheel) {
         mSlimWheel = isSlimWheel;
+        huePaint.setAntiAlias(true);
     }
 
     private static int blend( int destcolor, int srcColor, int alpha )
@@ -145,18 +149,18 @@ public class ColorPicker {
         return c;
     }
 
-    public void updateHue( Paint paint )
+    public void updateHue( )
     {
         mColorWheel.eraseColor(0xFF000000);
 
         Canvas canvas2 = new Canvas( mColorWheel );
-        paint.setColor( 0xFFFFFFFF );
+        huePaint.setColor(0xFFFFFFFF);
         RectF rect = new RectF( 0, 0, height(), height() );
-        canvas2.drawOval( rect, paint );
+        canvas2.drawOval( rect, huePaint );
 
-        paint.setColor( 0xFF000000 );
+        huePaint.setColor(0xFF000000);
         rect = new RectF( mWheelH , mWheelH, height() - mWheelH, height() - mWheelH );
-        canvas2.drawOval( rect, paint );
+        canvas2.drawOval( rect, huePaint );
 
         int wheelWidth = mColorWheel.getWidth();
         int[] pixels = new int[ wheelWidth ];
@@ -329,12 +333,14 @@ public class ColorPicker {
         {
             mHueChanging = true;
             mWheelRad = getWheelRad( ix, iy );
+            updateSV();
             return true;
         }
 
         if (insideSV( ix, iy ))
         {
             mSVChanging = true;
+            onTouchMove(ix, iy); // To Update mWheelX and mWheelY.
             return true;
         }
         return false;
@@ -362,7 +368,6 @@ public class ColorPicker {
             mWheelX = ix;
             mWheelY = iy;
 
-            updateSV();
             return true;
         }
 
