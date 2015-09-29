@@ -12,7 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,6 +69,19 @@ public class IrotoreActivity extends AppCompatActivity {
 
         answerPanel = (ColorPanelView)findViewById(R.id.answer_color_panel);
         selectedPanel = (ColorPanelView)findViewById(R.id.selected_color_panel);
+        answerPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onAnswerPanelClicked();
+            }
+        });
+        selectedPanel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onSelectedColorPanelClicked();
+            }
+        });
+
         actionButton = (Button)findViewById(R.id.action_button);
         actionButton.setText("Go");
 
@@ -94,6 +106,27 @@ public class IrotoreActivity extends AppCompatActivity {
 
     }
 
+    private void onSelectedColorPanelClicked() {
+        if(currentState == STATE_SELECT)
+            return;
+        if(selectedPanel.isPanelSelected())
+            return;
+        selectedPanel.setPanelSelected(true);
+        answerPanel.setPanelSelected(false);
+        colorPickerView.setColor(selectedPanel.getColor());
+    }
+
+    private void onAnswerPanelClicked() {
+        if(currentState == STATE_SELECT)
+            return;
+        if(answerPanel.isPanelSelected())
+            return;
+
+        answerPanel.setPanelSelected(true);
+        selectedPanel.setPanelSelected(false);
+        colorPickerView.setColor(answerPanel.getColor());
+    }
+
     private ColorPanelView getSelectedColorPanelView() {
         return (ColorPanelView)findViewById(R.id.selected_color_panel);
     }
@@ -115,8 +148,8 @@ public class IrotoreActivity extends AppCompatActivity {
             int selected = getSelectedColorPanelView().getColor();
 
             answerPanel.setColor(answer);
-            answerPanel.setSelected(true);
-            selectedPanel.setSelected(false);
+            answerPanel.setPanelSelected(true);
+            selectedPanel.setPanelSelected(false);
             colorPickerView.setColor(answer);
 
             checkAnswer(selected, answer);
@@ -128,8 +161,8 @@ public class IrotoreActivity extends AppCompatActivity {
 
 
             setDefaultAnswerColor();
-            answerPanel.setSelected(false);
-            selectedPanel.setSelected(true);
+            answerPanel.setPanelSelected(false);
+            selectedPanel.setPanelSelected(true);
             colorPickerView.setColor(getSelectedColorPanelView().getColor());
 
             scenario.gotoNextScenarioItem();
@@ -159,6 +192,7 @@ public class IrotoreActivity extends AppCompatActivity {
         StringBuilder bldr = new StringBuilder();
         bldr.append("Diff: ");
         bldr.append(diff);
+        /*
         bldr.append('\n');
         bldr.append("Selected: ");
         bldr.append(String.format("0x%x", selected));
@@ -167,6 +201,7 @@ public class IrotoreActivity extends AppCompatActivity {
         bldr.append(String.format("0x%x", answer));
         bldr.append('\n');
         targetView.outputDebug(bldr);
+        */
 
         TextView console = (TextView)findViewById(R.id.output_textview);
         console.setText(bldr.toString());

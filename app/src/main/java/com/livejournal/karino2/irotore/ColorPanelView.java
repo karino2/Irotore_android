@@ -12,9 +12,10 @@ import android.view.View;
  */
 public class ColorPanelView extends View {
 
-    boolean isSelected = false;
+    boolean isPanelSelected = false;
     Paint basePaint = new Paint();
     Paint framePaint = new Paint();
+    Paint selectedFramePaint = new Paint();
 
     final int FRAME_WIDTH = 4;
 
@@ -24,10 +25,18 @@ public class ColorPanelView extends View {
         framePaint.setStyle(Paint.Style.STROKE);
         framePaint.setStrokeWidth(FRAME_WIDTH);
         framePaint.setColor(0xFF404040);
+
+        selectedFramePaint.setStyle(Paint.Style.STROKE);
+        selectedFramePaint.setStrokeWidth(FRAME_WIDTH);
+        selectedFramePaint.setColor(0xFFEE1010);
     }
 
-    public void setSelected(boolean isSelected) {
-        this.isSelected = isSelected;
+    public void setPanelSelected(boolean isSelected) {
+        this.isPanelSelected = isSelected;
+        invalidate();
+    }
+    public boolean isPanelSelected() {
+        return isPanelSelected;
     }
 
     int currentColor = Color.BLACK;
@@ -46,7 +55,8 @@ public class ColorPanelView extends View {
         basePaint.setColor(currentColor);
         canvas.drawRect(0, 0, getWidth(), getHeight(), basePaint);
 
-        canvas.drawRect(FRAME_WIDTH, FRAME_WIDTH, getWidth()-FRAME_WIDTH, getHeight()-FRAME_WIDTH, framePaint);
+        Paint fpaint = isPanelSelected ? selectedFramePaint : framePaint;
+        canvas.drawRect(FRAME_WIDTH, FRAME_WIDTH, getWidth()-FRAME_WIDTH, getHeight()-FRAME_WIDTH, fpaint);
 
     }
 }
