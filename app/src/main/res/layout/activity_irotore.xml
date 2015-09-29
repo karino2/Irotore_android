@@ -25,6 +25,16 @@
         android:layout_toRightOf="@id/colorpicker_view"
         android:id="@+id/answer_color_panel" />
 
+    <Button
+        android:id="@+id/action_button"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/answer_color_panel"
+        android:layout_alignTop="@id/colorpicker_view"
+        />
+
+
+
     <com.livejournal.karino2.irotore.TargetImageView
         android:id="@+id/targetimage_content"
         android:layout_width="match_parent"
@@ -32,4 +42,17 @@
         android:layout_alignParentTop="true"
         android:layout_above="@id/colorpicker_view"
          />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="none"
+        android:id="@+id/output_textview"
+        android:layout_below="@+id/action_button"
+        android:layout_toRightOf="@+id/answer_color_panel"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/targetimage_content"
+        android:layout_alignEnd="@+id/targetimage_content" />
+
 </RelativeLayout>

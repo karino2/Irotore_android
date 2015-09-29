@@ -10,6 +10,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.FileNotFoundException;
@@ -41,6 +45,10 @@ public class IrotoreActivity extends AppCompatActivity {
     }
 
     TargetImageView targetView;
+    ColorPickerView colorPickerView;
+    ColorPanelView answerPanel;
+    ColorPanelView selectedPanel;
+    Button actionButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,17 +59,29 @@ public class IrotoreActivity extends AppCompatActivity {
         handleSendIntent();
         handleStoredUriIfNecessary();
 
-        ColorPickerView colorPickerView = (ColorPickerView)findViewById(R.id.colorpicker_view);
+        colorPickerView = (ColorPickerView)findViewById(R.id.colorpicker_view);
         colorPickerView.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
             @Override
             public void onColorChanged(int color) {
-                ColorPanelView selectedPanel = (ColorPanelView)findViewById(R.id.selected_color_panel);
+                ColorPanelView selectedPanel = getSelectedColorPanelView();
                 selectedPanel.setColor(color);
             }
         });
 
-        ColorPanelView answerPanel = (ColorPanelView)findViewById(R.id.answer_color_panel);
-        answerPanel.setColor(0xFFE6E6E6);
+        answerPanel = (ColorPanelView)findViewById(R.id.answer_color_panel);
+        selectedPanel = (ColorPanelView)findViewById(R.id.selected_color_panel);
+        actionButton = (Button)findViewById(R.id.action_button);
+        actionButton.setText("Go");
+
+
+        setDefaultAnswerColor();
+
+        actionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                onActionClicked();
+            }
+        });
 
 
         if(scenario == null)
@@ -72,6 +92,84 @@ public class IrotoreActivity extends AppCompatActivity {
 
         setupNewScenario();
 
+    }
+
+    private ColorPanelView getSelectedColorPanelView() {
+        return (ColorPanelView)findViewById(R.id.selected_color_panel);
+    }
+
+    private void setDefaultAnswerColor() {
+        answerPanel.setColor(0xFFE6E6E6);
+    }
+
+    final int STATE_SELECT = 1;
+    final int STATE_ANSWER = 2;
+
+    int currentState = STATE_SELECT;
+    private void onActionClicked() {
+        if(currentState == STATE_SELECT) {
+            currentState = STATE_ANSWER;
+            actionButton.setText("Next");
+
+            int answer = targetView.getAnswerColor();
+            int selected = getSelectedColorPanelView().getColor();
+
+            answerPanel.setColor(answer);
+            answerPanel.setSelected(true);
+            selectedPanel.setSelected(false);
+            colorPickerView.setColor(answer);
+
+            checkAnswer(selected, answer);
+
+
+        } else { // ANSWER, goto next.
+            currentState = STATE_SELECT;
+            actionButton.setText("Go");
+
+
+            setDefaultAnswerColor();
+            answerPanel.setSelected(false);
+            selectedPanel.setSelected(true);
+            colorPickerView.setColor(getSelectedColorPanelView().getColor());
+
+            scenario.gotoNextScenarioItem();
+            applyCurrentScenario();
+        }
+    }
+
+    private void applyCurrentScenario() {
+        ScenarioItem item = scenario.getCurrentItem();
+        targetView.setTargetXY(item.getTargetX(), item.getTargetY());
+    }
+
+    private void checkAnswer(int selected, int answer) {
+        int sr = (selected & 0x00FF0000) >> 16;
+        int sg = (selected & 0x0000FF00) >> 8;
+        int sb = (selected & 0x000000FF);
+
+        int ar = (answer & 0x00FF0000) >> 16;
+        int ag = (answer & 0x0000FF00) >> 8;
+        int ab = (answer & 0x000000FF);
+
+        int diff = 0;
+        diff += Math.abs(sr - ar);
+        diff += Math.abs(sg-ag);
+        diff += Math.abs(sb-ab);
+
+        StringBuilder bldr = new StringBuilder();
+        bldr.append("Diff: ");
+        bldr.append(diff);
+        bldr.append('\n');
+        bldr.append("Selected: ");
+        bldr.append(String.format("0x%x", selected));
+        bldr.append('\n');
+        bldr.append("Answer: ");
+        bldr.append(String.format("0x%x", answer));
+        bldr.append('\n');
+        targetView.outputDebug(bldr);
+
+        TextView console = (TextView)findViewById(R.id.output_textview);
+        console.setText(bldr.toString());
     }
 
     @Override
@@ -102,9 +200,10 @@ public class IrotoreActivity extends AppCompatActivity {
             scenario.setSize(options.outWidth, options.outHeight);
 
             targetView.setImage(bitmap);
-            ScenarioItem item = scenario.getCurrentItem();
-            targetView.setTargetXY(item.getTargetX(), item.getTargetY());
-            saveUri(item.getTargetImage());
+
+            applyCurrentScenario();
+
+            saveUri(scenario.getTargetImage());
         } catch (FileNotFoundException e) {
             showMessage("file not found: " + e.getMessage());
         } finally {

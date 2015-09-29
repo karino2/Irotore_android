@@ -22,6 +22,11 @@ public class ColorPickerView extends View {
     boolean isColorPickMode = true;
     int selectedColor = Color.BLACK;
 
+    public void setColor(int color) {
+        colorPicker.setColor(color);
+        invalidate();
+    }
+
     public interface OnColorChangedListener {
         void onColorChanged(int color);
     }

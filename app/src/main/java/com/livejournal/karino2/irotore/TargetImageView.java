@@ -134,6 +134,7 @@ public class TargetImageView extends View {
         return imageRegion;
     }
 
+    double scale = 1.0;
     RectF initialViewRegion = null;
     RectF getImageViewRegion() {
         if(initialViewRegion == null) {
@@ -141,11 +142,13 @@ public class TargetImageView extends View {
             double yScale = ((double)getMeasuredHeight())/((double)image.getHeight());
             if(xScale > yScale) {
                 // fill y.
+                scale = yScale;
                 double scaledWidth = image.getWidth()*yScale;
                 double xSpace = getMeasuredWidth() - scaledWidth;
                 initialViewRegion = new RectF((float)(xSpace/2.0), 0, (float)(xSpace/2.0+scaledWidth), getMeasuredHeight());
             } else {
                 // fill x.
+                scale = xScale;
                 double scaledHeight = image.getHeight()*xScale;
                 double ySpace = getMeasuredHeight() - scaledHeight;
                 initialViewRegion = new RectF(0, (float)(ySpace/2.0), getMeasuredWidth(), (float)(ySpace/2.0+scaledHeight));
@@ -169,7 +172,7 @@ public class TargetImageView extends View {
         canvas.drawBitmap(image, getImageRegion(), getImageViewRegion(), null);
         if(targetX != -1) {
             RectF rect = getImageViewRegion();
-            canvas.drawCircle(rect.left+targetX, rect.top+targetY, RADIUS, targetPositionPaint);
+            canvas.drawCircle((int)(rect.left+targetX*scale), (int)(rect.top+targetY*scale), RADIUS, targetPositionPaint);
         }
         canvas.restoreToCount(saveCount);
     }
@@ -180,5 +183,16 @@ public class TargetImageView extends View {
         this.targetX = targetX;
         this.targetY = targetY;
         invalidate();
+    }
+
+    public int getAnswerColor() {
+        return image.getPixel(targetX, targetY);
+    }
+
+    public void outputDebug(StringBuilder bldr) {
+        bldr.append("targetX, Y=");
+        bldr.append(targetX);
+        bldr.append(",");
+        bldr.append(targetY);
     }
 }
