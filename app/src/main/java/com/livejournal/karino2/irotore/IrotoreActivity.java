@@ -51,6 +51,19 @@ public class IrotoreActivity extends AppCompatActivity {
         handleSendIntent();
         handleStoredUriIfNecessary();
 
+        ColorPickerView colorPickerView = (ColorPickerView)findViewById(R.id.colorpicker_view);
+        colorPickerView.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
+            @Override
+            public void onColorChanged(int color) {
+                ColorPanelView selectedPanel = (ColorPanelView)findViewById(R.id.selected_color_panel);
+                selectedPanel.setColor(color);
+            }
+        });
+
+        ColorPanelView answerPanel = (ColorPanelView)findViewById(R.id.answer_color_panel);
+        answerPanel.setColor(0xFFE6E6E6);
+
+
         if(scenario == null)
         {
             chooseTargetImage();
