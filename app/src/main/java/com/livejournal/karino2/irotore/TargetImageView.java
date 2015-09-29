@@ -33,6 +33,11 @@ public class TargetImageView extends View {
     Bitmap image;
     public void setImage(Bitmap bitmap) {
         image = bitmap;
+
+        matrix = new Matrix();
+        initialViewRegion = null;
+        imageRegion = null;
+
         invalidate();
     }
 
