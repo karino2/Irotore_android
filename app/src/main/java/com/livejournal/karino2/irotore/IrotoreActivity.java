@@ -23,6 +23,7 @@ public class IrotoreActivity extends AppCompatActivity {
 
     final int REQUEST_GET_IMAGE = 1;
     RandomScenario scenario;
+    GameState gameState;
 
     Uri getStoredUri() {
         SharedPreferences prefs = getSharedPreferences("prefs", MODE_PRIVATE);
@@ -107,7 +108,7 @@ public class IrotoreActivity extends AppCompatActivity {
     }
 
     private void onSelectedColorPanelClicked() {
-        if(currentState == STATE_SELECT)
+        if(gameState.getCurrentState() == GameState.STATE_SELECT)
             return;
         if(selectedPanel.isPanelSelected())
             return;
@@ -117,7 +118,7 @@ public class IrotoreActivity extends AppCompatActivity {
     }
 
     private void onAnswerPanelClicked() {
-        if(currentState == STATE_SELECT)
+        if(gameState.getCurrentState() == GameState.STATE_SELECT)
             return;
         if(answerPanel.isPanelSelected())
             return;
@@ -135,14 +136,24 @@ public class IrotoreActivity extends AppCompatActivity {
         answerPanel.setColor(0xFFE6E6E6);
     }
 
-    final int STATE_SELECT = 1;
-    final int STATE_ANSWER = 2;
-
-    int currentState = STATE_SELECT;
     private void onActionClicked() {
-        if(currentState == STATE_SELECT) {
-            currentState = STATE_ANSWER;
-            actionButton.setText("Next");
+        if (gameState.getCurrentState() == GameState.STATE_FINISH) {
+            gameState.restart();
+            becomeSelectState();
+            return;
+        }
+
+        gameState.gotoNextState();
+
+
+        if (gameState.getCurrentState() == GameState.STATE_ANSWER ||
+                gameState.getCurrentState() == GameState.STATE_FINISH){
+
+            if(gameState.getCurrentState() == GameState.STATE_ANSWER)
+                actionButton.setText("Next");
+            else
+                actionButton.setText("New");
+
 
             int answer = targetView.getAnswerColor();
             int selected = getSelectedColorPanelView().getColor();
@@ -154,24 +165,29 @@ public class IrotoreActivity extends AppCompatActivity {
 
             checkAnswer(selected, answer);
 
+            /*
+            TODO: Show total score.
+            if(gameState.getCurrentState() == GameState.STATE_FINISH)
+             */
 
-        } else { // ANSWER, goto next.
-            currentState = STATE_SELECT;
-            actionButton.setText("Go");
-
-
-            setDefaultAnswerColor();
-            answerPanel.setPanelSelected(false);
-            selectedPanel.setPanelSelected(true);
-            colorPickerView.setColor(getSelectedColorPanelView().getColor());
-
-            scenario.gotoNextScenarioItem();
-            applyCurrentScenario();
+        } else { // State == SELECT
+            becomeSelectState();
         }
     }
 
+    private void becomeSelectState() {
+        actionButton.setText("Go");
+
+        setDefaultAnswerColor();
+        answerPanel.setPanelSelected(false);
+        selectedPanel.setPanelSelected(true);
+        colorPickerView.setColor(getSelectedColorPanelView().getColor());
+
+        applyCurrentScenario();
+    }
+
     private void applyCurrentScenario() {
-        ScenarioItem item = scenario.getCurrentItem();
+        ScenarioItem item = gameState.getCurrentScenarioItem();
         targetView.setTargetXY(item.getTargetX(), item.getTargetY());
     }
 
@@ -228,6 +244,8 @@ public class IrotoreActivity extends AppCompatActivity {
     private void setupNewScenario() {
         InputStream is = null;
         try {
+            gameState = new GameState(scenario);
+
             is = getContentResolver().openInputStream(scenario.getTargetImage());
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
@@ -235,8 +253,8 @@ public class IrotoreActivity extends AppCompatActivity {
             scenario.setSize(options.outWidth, options.outHeight);
 
             targetView.setImage(bitmap);
-
             applyCurrentScenario();
+
 
             saveUri(scenario.getTargetImage());
         } catch (FileNotFoundException e) {

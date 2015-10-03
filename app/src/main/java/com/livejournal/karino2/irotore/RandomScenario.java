@@ -5,15 +5,20 @@ import android.net.Uri;
 /**
  * Created by karino on 9/29/15.
  */
-public class RandomScenario {
+public class RandomScenario implements Scenario {
     Uri imageUri;
     int width;
     int height;
+
+    int index;
+    int maxScenarioNum = 5;
 
     public RandomScenario(Uri uri) {
         imageUri = uri;
         width = -1;
         height = -1;
+
+        index = 0;
     }
 
     public Uri getTargetImage() {
@@ -24,15 +29,10 @@ public class RandomScenario {
         this.height = height;
     }
 
-    public int getWidth() {
-        return width;
-    }
-    public int getHeight() {
-        return height;
-    }
-
-    public boolean hasNext() {
-        return true; // infinite.
+    @Override
+    public boolean hasNext()
+    {
+        return (index < maxScenarioNum);
     }
 
     ScenarioItem generateRandomItem() {
@@ -43,12 +43,21 @@ public class RandomScenario {
         return new ScenarioItem(imageUri, width, height, targetX, targetY);
     }
 
+    @Override
     public void gotoNextScenarioItem() {
+        item = generateRandomItem();
+        index++;
+    }
+
+    @Override
+    public void restart() {
+        index = 0;
         item = generateRandomItem();
     }
 
     ScenarioItem item;
 
+    @Override
     public ScenarioItem getCurrentItem() {
         if(item == null) {
             gotoNextScenarioItem();
