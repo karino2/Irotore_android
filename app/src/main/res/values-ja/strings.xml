@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">色トレ！</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="action_open">Open</string>
+    <string name="label_next">次へ</string>
+    <string name="label_diff">差分</string>
+    <string name="label_start">開始</string>
+    <string name="label_score">スコア</string>
+    <string name="label_past_average">最近の平均</string>
+    <string name="label_check">決定</string>
+    <string name="label_done">終了！</string>
+
+</resources>
