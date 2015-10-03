@@ -29,10 +29,18 @@ public class RandomScenario implements Scenario {
         this.height = height;
     }
 
+    public int getTotalItemNum() {
+        return maxScenarioNum;
+    }
+
+    public int getCurrentIndex() {
+        return index;
+    }
+
     @Override
     public boolean hasNext()
     {
-        return (index < maxScenarioNum);
+        return (index+1 < maxScenarioNum);
     }
 
     ScenarioItem generateRandomItem() {
@@ -60,7 +68,7 @@ public class RandomScenario implements Scenario {
     @Override
     public ScenarioItem getCurrentItem() {
         if(item == null) {
-            gotoNextScenarioItem();
+            item = generateRandomItem();
         }
         return item;
     }

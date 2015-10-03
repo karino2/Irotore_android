@@ -44,12 +44,23 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
-        android:text="none"
+        android:text="@string/initial_msg"
         android:id="@+id/output_textview"
         android:layout_below="@+id/action_button"
         android:layout_toRightOf="@+id/answer_color_panel"
         android:layout_alignParentBottom="true"
         android:layout_alignRight="@+id/targetimage_content"
         android:layout_alignEnd="@+id/targetimage_content" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="@string/label_scenario_pos"
+        android:id="@+id/remain_state_textview"
+        android:layout_toRightOf="@+id/action_button"
+        android:layout_toEndOf="@+id/action_button"
+        android:layout_alignTop="@id/colorpicker_view"
+     />
 
 </RelativeLayout>

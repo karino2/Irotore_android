@@ -11,4 +11,7 @@
     <string name="label_past_average">Recent Avg.</string>
     <string name="label_check">Check</string>
     <string name="label_done">Done</string>
+    <string name="initial_msg">Choose color at the center of red circle, then press Check button.</string>
+    <string name="label_scenario_pos">Now (?/?)</string>
+    <string name="scenario_pos_format">Now (%s)</string>
 </resources>

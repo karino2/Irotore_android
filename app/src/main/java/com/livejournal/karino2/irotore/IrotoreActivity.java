@@ -148,6 +148,7 @@ public class IrotoreActivity extends AppCompatActivity {
         if (gameState.getCurrentState() == GameState.STATE_FINISH) {
             gameState.restart();
             becomeSelectState();
+
             return;
         }
 
@@ -180,6 +181,7 @@ public class IrotoreActivity extends AppCompatActivity {
         }else if (gameState.getCurrentState() == GameState.STATE_FINISH){
             showMessage(getString(R.string.label_done));
 
+
             actionButton.setText(getString(R.string.label_start));
 
 
@@ -192,11 +194,12 @@ public class IrotoreActivity extends AppCompatActivity {
             bldr.append(": ");
             bldr.append(diff);
             bldr.append('\n');
+
             bldr.append(getString(R.string.label_score));
             bldr.append(": ");
-
-            bldr.append(mean);
+            bldr.append(String.format("%.2f", mean));
             bldr.append('\n');
+
             bldr.append(getString(R.string.label_past_average));
             bldr.append(": ");
             bldr.append(String.format("%.2f", pastAverage));
@@ -204,6 +207,7 @@ public class IrotoreActivity extends AppCompatActivity {
             String result = bldr.toString();
             displayResult(result);
 
+            setStateLabel(getString(R.string.label_done));
 
         } else { // State == SELECT
             becomeSelectState();
@@ -242,6 +246,8 @@ public class IrotoreActivity extends AppCompatActivity {
     private void applyCurrentScenario() {
         ScenarioItem item = gameState.getCurrentScenarioItem();
         targetView.setTargetXY(item.getTargetX(), item.getTargetY());
+
+        updateStatusLabel(scenario.getCurrentIndex()+1, scenario.getTotalItemNum());
     }
 
     private void displayResult(String result) {
@@ -283,6 +289,8 @@ public class IrotoreActivity extends AppCompatActivity {
         }
     }
 
+
+
     private void setupNewScenario() {
         InputStream is = null;
         try {
@@ -297,6 +305,8 @@ public class IrotoreActivity extends AppCompatActivity {
             targetView.setImage(bitmap);
             applyCurrentScenario();
 
+            updateStatusLabel(scenario.getCurrentIndex()+1, scenario.getTotalItemNum());
+
 
             saveUri(scenario.getTargetImage());
         } catch (FileNotFoundException e) {
@@ -308,6 +318,17 @@ public class IrotoreActivity extends AppCompatActivity {
                 showMessage("is close fail. What situation!?");
             }
         }
+    }
+
+    private void updateStatusLabel(int currentIndexForDisplay, int totalNum) {
+        String parcent = String.format("%d/%d", currentIndexForDisplay, totalNum);
+        String label = String.format(getString(R.string.scenario_pos_format), parcent);
+        setStateLabel(label);
+    }
+
+    private void setStateLabel(String label) {
+        TextView tv = (TextView)findViewById(R.id.remain_state_textview);
+        tv.setText(label);
     }
 
     @Override
