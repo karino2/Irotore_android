@@ -58,6 +58,11 @@ public class RandomScenario implements Scenario {
     }
 
     @Override
+    public void skipCurrent() {
+        item = generateRandomItem();
+    }
+
+    @Override
     public void restart() {
         index = 0;
         item = generateRandomItem();

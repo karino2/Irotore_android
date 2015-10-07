@@ -14,4 +14,5 @@
     <string name="initial_msg">Choose color at the center of red circle, then press Check button.</string>
     <string name="label_scenario_pos">Now (?/?)</string>
     <string name="scenario_pos_format">Now (%s)</string>
+    <string name="label_skip">Skip</string>
 </resources>

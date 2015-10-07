@@ -54,6 +54,7 @@ public class IrotoreActivity extends AppCompatActivity {
     ColorPanelView selectedPanel;
     Button actionButton;
     ScoreRecorder scoreRecorder;
+    Button skipButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,6 +92,14 @@ public class IrotoreActivity extends AppCompatActivity {
             }
         });
 
+        skipButton = (Button)findViewById(R.id.buttonSkip);
+        skipButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Skip();
+            }
+        });
+
         actionButton = (Button)findViewById(R.id.action_button);
         actionButton.setText(getString(R.string.label_check));
 
@@ -113,6 +122,11 @@ public class IrotoreActivity extends AppCompatActivity {
 
         setupNewScenario();
 
+    }
+
+    private void Skip() {
+        scenario.skipCurrent();
+        applyCurrentScenario();
     }
 
     private void onSelectedColorPanelClicked() {
@@ -230,6 +244,7 @@ public class IrotoreActivity extends AppCompatActivity {
         answerPanel.setPanelSelected(true);
         selectedPanel.setPanelSelected(false);
         colorPickerView.setColor(answer);
+        skipButton.setEnabled(false);
     }
 
     private void becomeSelectState() {
@@ -239,6 +254,7 @@ public class IrotoreActivity extends AppCompatActivity {
         answerPanel.setPanelSelected(false);
         selectedPanel.setPanelSelected(true);
         colorPickerView.setColor(getSelectedColorPanelView().getColor());
+        skipButton.setEnabled(true);
 
         applyCurrentScenario();
     }

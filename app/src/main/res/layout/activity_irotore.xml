@@ -63,4 +63,13 @@
         android:layout_alignTop="@id/colorpicker_view"
      />
 
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_skip"
+        android:id="@+id/buttonSkip"
+        android:layout_below="@+id/targetimage_content"
+        android:layout_toRightOf="@+id/remain_state_textview"
+        android:layout_toEndOf="@+id/remain_state_textview" />
+
 </RelativeLayout>

@@ -11,4 +11,6 @@ public interface Scenario {
     void restart();
 
     ScenarioItem getCurrentItem();
+
+    void skipCurrent();
 }

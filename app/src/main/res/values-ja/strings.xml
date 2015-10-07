@@ -14,4 +14,5 @@
     <string name="initial_msg">赤丸の真ん中の色を選んで決定ボタンを押して下さい。</string>
     <string name="label_scenario_pos">現在 (?/?)</string>
     <string name="scenario_pos_format">現在 (%s)</string>
+    <string name="label_skip">Skip</string>
 </resources>
