@@ -20,8 +20,14 @@ public class ScoreRecorder {
     public ScoreRecorder(SharedPreferences prefs) {
         this.prefs = prefs;
         pastAverage = prefs.getFloat("PAST_AVERAGE", -1);
-        for(int i = 0; i < AVERAGE_NUM; i++) {
-            pastScores.add(pastAverage);
+        if(pastAverage != -1) {
+            fillPastScores(pastAverage);
+        }
+    }
+
+    private void fillPastScores(double average) {
+        for (int i = 0; i < AVERAGE_NUM; i++) {
+            pastScores.add(average);
         }
     }
 
@@ -47,6 +53,9 @@ public class ScoreRecorder {
     }
 
     public double setNewAverageAndResetScores(double mean) {
+        if(pastScores.size() == 0) {
+            fillPastScores(mean);
+        }
         pastScores.remove(0);
         pastScores.add(mean);
         pastAverage = calcAverageDouble(pastScores);
