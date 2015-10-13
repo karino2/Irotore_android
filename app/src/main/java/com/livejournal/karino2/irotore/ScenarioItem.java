@@ -6,23 +6,18 @@ import android.net.Uri;
  * Created by karino on 9/29/15.
  */
 public class ScenarioItem {
-    Uri imageUri;
     int width;
     int height;
     int targetX;
     int targetY;
 
-    public ScenarioItem(Uri uri, int width, int height, int targetX, int targetY) {
-        imageUri = uri;
+    public ScenarioItem(int width, int height, int targetX, int targetY) {
         this.width = width;
         this.height = height;
         this.targetX = targetX;
         this.targetY = targetY;
     }
 
-    public Uri getTargetImage() {
-        return imageUri;
-    }
     public int getWidth() {
         return width;
     }

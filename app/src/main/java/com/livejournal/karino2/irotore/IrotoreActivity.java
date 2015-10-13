@@ -1,11 +1,11 @@
 package com.livejournal.karino2.irotore;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -15,7 +15,9 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -37,12 +39,6 @@ public class IrotoreActivity extends AppCompatActivity {
         return getSharedPreferences("prefs", MODE_PRIVATE);
     }
 
-    void saveUri(Uri uri) {
-        SharedPreferences prefs = getMyPreferences();
-        prefs.edit()
-                .putString("target_uri", uri.toString())
-                .commit();
-    }
 
     private void showMessage(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
@@ -66,7 +62,7 @@ public class IrotoreActivity extends AppCompatActivity {
         targetView = (TargetImageView)findViewById(R.id.targetimage_content);
 
         handleSendIntent();
-        handleStoredUriIfNecessary();
+        loadScenarioIfNecessaryAndPossible();
 
         colorPickerView = (ColorPickerView)findViewById(R.id.colorpicker_view);
         colorPickerView.setOnColorChangedListener(new ColorPickerView.OnColorChangedListener() {
@@ -263,7 +259,7 @@ public class IrotoreActivity extends AppCompatActivity {
         ScenarioItem item = gameState.getCurrentScenarioItem();
         targetView.setTargetXY(item.getTargetX(), item.getTargetY());
 
-        updateStatusLabel(scenario.getCurrentIndex()+1, scenario.getTotalItemNum());
+        updateStatusLabel(scenario.getCurrentIndex() + 1, scenario.getTotalItemNum());
     }
 
     private void displayResult(String result) {
@@ -286,22 +282,11 @@ public class IrotoreActivity extends AppCompatActivity {
         diff += Math.abs(sb-ab);
         return diff;
     }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        if(scenario != null) {
-            outState.putString("target_uri", scenario.getTargetImage().toString());
-        }
-        super.onSaveInstanceState(outState, outPersistentState);
-    }
-
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         if(scenario == null) {
-            String uriStr = savedInstanceState.getString("target_uri", null);
-            if(uriStr != null)
-                scenario = new RandomScenario(Uri.parse(savedInstanceState.getString("target_uri")));
+            loadScenarioIfNecessaryAndPossible();
         }
     }
 
@@ -312,7 +297,7 @@ public class IrotoreActivity extends AppCompatActivity {
         try {
             gameState = new GameState(scenario);
 
-            is = getContentResolver().openInputStream(scenario.getTargetImage());
+            is = openFileInput(TARGET_FILE_NAME);
             BitmapFactory.Options options = new BitmapFactory.Options();
             options.inJustDecodeBounds = false;
             Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
@@ -321,15 +306,13 @@ public class IrotoreActivity extends AppCompatActivity {
             targetView.setImage(bitmap);
             applyCurrentScenario();
 
-            updateStatusLabel(scenario.getCurrentIndex()+1, scenario.getTotalItemNum());
-
-
-            saveUri(scenario.getTargetImage());
+            updateStatusLabel(scenario.getCurrentIndex() + 1, scenario.getTotalItemNum());
         } catch (FileNotFoundException e) {
             showMessage("file not found: " + e.getMessage());
         } finally {
             try {
-                is.close();
+                if(is != null)
+                   is.close();
             } catch (IOException e) {
                 showMessage("is close fail. What situation!?");
             }
@@ -347,13 +330,39 @@ public class IrotoreActivity extends AppCompatActivity {
         tv.setText(label);
     }
 
+    static final String TARGET_FILE_NAME = "target_img.png";
+
+    void saveImageToInternalStorage(Uri uri) {
+        InputStream is = null;
+        try {
+            is = getContentResolver().openInputStream(uri);
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = false;
+            Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
+
+            FileOutputStream fos = openFileOutput(TARGET_FILE_NAME, Context.MODE_PRIVATE);
+
+            // Writing the bitmap to the output stream
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.close();
+        } catch (FileNotFoundException e) {
+            showMessage("File not found: " + e.getMessage());
+        } catch (IOException e) {
+            showMessage("IOException: " + e.getMessage());
+        }
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case REQUEST_GET_IMAGE:
                 if(resultCode == RESULT_OK) {
                     String path = data.getData().toString();
-                    scenario = new RandomScenario(Uri.parse(path));
+                    saveImageToInternalStorage(Uri.parse(path));
+
+                    // now, recreate is not necessary, but keep this line for laziness.
+                    scenario = new RandomScenario();
                     setupNewScenario();
                 }
                 return;
@@ -370,13 +379,17 @@ public class IrotoreActivity extends AppCompatActivity {
     }
 
 
-    private void handleStoredUriIfNecessary() {
+    private void loadScenarioIfNecessaryAndPossible() {
         if(scenario == null)
         {
-            Uri uri = getStoredUri();
-            if(uri != null)
-            {
-                scenario = new RandomScenario(uri);
+            try {
+                FileInputStream fs = openFileInput(TARGET_FILE_NAME);
+                scenario = new RandomScenario();
+                fs.close();
+            } catch (FileNotFoundException e) {
+                scenario = null;
+            } catch (IOException e) {
+                scenario = null;
             }
         }
     }
@@ -387,7 +400,8 @@ public class IrotoreActivity extends AppCompatActivity {
 
             Uri uri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
             if (uri != null) {
-                scenario = new RandomScenario(uri);
+                saveImageToInternalStorage(uri);
+                scenario = new RandomScenario();
             }
         }
     }

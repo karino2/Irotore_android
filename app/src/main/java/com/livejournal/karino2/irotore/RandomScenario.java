@@ -6,24 +6,19 @@ import android.net.Uri;
  * Created by karino on 9/29/15.
  */
 public class RandomScenario implements Scenario {
-    Uri imageUri;
     int width;
     int height;
 
     int index;
     int maxScenarioNum = 5;
 
-    public RandomScenario(Uri uri) {
-        imageUri = uri;
+    public RandomScenario() {
         width = -1;
         height = -1;
 
         index = 0;
     }
 
-    public Uri getTargetImage() {
-        return imageUri;
-    }
     public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
@@ -48,7 +43,7 @@ public class RandomScenario implements Scenario {
             throw new RuntimeException("Not set width, height. Must not happen.");
         int targetX = (int)(width*Math.random());
         int targetY = (int)(height*Math.random());
-        return new ScenarioItem(imageUri, width, height, targetX, targetY);
+        return new ScenarioItem(width, height, targetX, targetY);
     }
 
     @Override
