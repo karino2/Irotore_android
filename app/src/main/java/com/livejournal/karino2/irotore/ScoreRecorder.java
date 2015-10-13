@@ -11,13 +11,18 @@ import java.util.List;
 public class ScoreRecorder {
     List<Integer> scores = new ArrayList<Integer>();
     double pastAverage;
-    final double AVERAGE_INTERVAL = 10.0;
+    final int AVERAGE_NUM = 5;
+
+    List<Double> pastScores = new ArrayList<Double>();
 
     SharedPreferences prefs;
 
     public ScoreRecorder(SharedPreferences prefs) {
         this.prefs = prefs;
         pastAverage = prefs.getFloat("PAST_AVERAGE", -1);
+        for(int i = 0; i < AVERAGE_NUM; i++) {
+            pastScores.add(pastAverage);
+        }
     }
 
     public void addScore(int oneScore) {
@@ -32,12 +37,19 @@ public class ScoreRecorder {
         return ((double)sum)/scores.size();
     }
 
-    public double setNewAverageAndResetScores(double mean) {
-        if(pastAverage == -1) {
-            pastAverage = mean;
-        } else {
-            pastAverage = (pastAverage * (AVERAGE_INTERVAL - 1) + mean) / AVERAGE_INTERVAL;
+    public double calcAverageDouble(List<Double> arr) {
+        double sum = 0;
+        for(double score : arr) {
+            sum+=score;
         }
+        return sum/arr.size();
+    }
+
+    public double setNewAverageAndResetScores(double mean) {
+        pastScores.remove(0);
+        pastScores.add(mean);
+        pastAverage = calcAverageDouble(pastScores);
+
         prefs.edit()
                 .putFloat("PAST_AVERAGE", (float)pastAverage)
                 .commit();
