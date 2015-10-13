@@ -19,7 +19,6 @@ public class ColorPickerView extends View {
     Paint basePaint;
     Rect wholeRect = new Rect();
 
-    boolean isColorPickMode = true;
     int selectedColor = Color.BLACK;
 
     public void setColor(int color) {

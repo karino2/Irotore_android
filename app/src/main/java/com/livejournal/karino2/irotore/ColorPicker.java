@@ -126,6 +126,14 @@ public class ColorPicker {
 
     public void setColor(int color)
     {
+        if(mColorGrad == null)
+        {
+            // before onResize coming, there are no mColorGrad.
+            // This is only happen when becomeSelect() called at onCreate of IrotoreActivity.
+            // Just ignore in this case.
+            return;
+        }
+
         float[] hsv = { 0, 0, 0 };
         Color.colorToHSV(color, hsv);
         mWheelRad = hsv[0] * 2 * Math.PI / 360;

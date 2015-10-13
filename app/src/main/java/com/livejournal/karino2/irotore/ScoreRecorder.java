@@ -28,6 +28,7 @@ public class ScoreRecorder {
     public void addScore(int oneScore) {
         scores.add(oneScore);
     }
+    public void resetCurrentScores() { scores.clear(); }
 
     public double calculateAverage() {
         int sum = 0;

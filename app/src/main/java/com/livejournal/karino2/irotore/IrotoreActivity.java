@@ -305,6 +305,8 @@ public class IrotoreActivity extends AppCompatActivity {
 
             targetView.setImage(bitmap);
             applyCurrentScenario();
+            becomeSelectState();
+            scoreRecorder.resetCurrentScores();
 
             updateStatusLabel(scenario.getCurrentIndex() + 1, scenario.getTotalItemNum());
         } catch (FileNotFoundException e) {
