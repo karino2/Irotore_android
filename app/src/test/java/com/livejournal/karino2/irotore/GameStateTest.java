@@ -33,6 +33,9 @@ public class GameStateTest {
         public void restart() {
             restartCalled = true;
         }
+
+        @Override
+        public void skipCurrent() {}
     }
 
     @Test
