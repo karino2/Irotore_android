@@ -6,16 +6,19 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
 
 public class TargetImageView extends View {
 
+    // Paint origPaint;
     Paint targetPositionPaint;
     final int RADIUS = 20;
     public TargetImageView(Context context, AttributeSet attrs) {
@@ -25,14 +28,31 @@ public class TargetImageView extends View {
         targetPositionPaint.setColor(Color.RED);
         targetPositionPaint.setStrokeWidth(2);
         targetPositionPaint.setStyle(Paint.Style.STROKE);
+
+        /*
+        origPaint = new Paint();
+        origPaint.setColor(Color.BLUE);
+        origPaint.setStrokeWidth(2);
+        origPaint.setStyle(Paint.Style.STROKE);
+        */
+
     }
 
 
+    final int MINIMUM_BITMAP_SIZE = 100;
     Matrix matrix = new Matrix();
 
+    final int THUMBNAIL_RATIO = 4;
     Bitmap image;
+    Bitmap thumbnail;
     public void setImage(Bitmap bitmap) {
+        if(bitmap.getWidth() < MINIMUM_BITMAP_SIZE || bitmap.getHeight() < MINIMUM_BITMAP_SIZE)
+            throw new IllegalArgumentException("Too small size");
+
+
         image = bitmap;
+        thumbnail = Bitmap.createScaledBitmap(bitmap, bitmap.getWidth()/THUMBNAIL_RATIO, bitmap.getHeight()/THUMBNAIL_RATIO, true);
+
 
         matrix = new Matrix();
         initialViewRegion = null;
@@ -173,15 +193,46 @@ public class TargetImageView extends View {
         if(targetX != -1) {
             RectF rect = getImageViewRegion();
             canvas.drawCircle((int)(rect.left+targetX*scale), (int)(rect.top+targetY*scale), RADIUS, targetPositionPaint);
+            // canvas.drawCircle((int)(rect.left+origTargetX*scale), (int)(rect.top+origTargetY*scale), RADIUS, origPaint);
         }
         canvas.restoreToCount(saveCount);
     }
 
+    SmoothestFinder finder = new SmoothestFinder();
+    /*
+    int origTargetX;
+    int origTargetY;
+    */
+
+    void adjustBestNeighbor(int originalX, int originalY) {
+        /*
+        origTargetX = originalX;
+        origTargetY = originalY;
+        */
+        Point thumbnailPos = new Point(originalX / THUMBNAIL_RATIO,  originalY /THUMBNAIL_RATIO);
+        // Log.d("IroTore", "orgthumX, y=" + thumbnailPos.x + "," + thumbnailPos.y);
+        thumbnailPos = findBestNeighbor(thumbnail, thumbnailPos);
+        // Log.d("IroTore", "res_thumX, y=" + thumbnailPos.x + "," + thumbnailPos.y);
+        Point resultPos = new Point(thumbnailPos.x*THUMBNAIL_RATIO, thumbnailPos.y*THUMBNAIL_RATIO);
+        /*
+        Point resultPos = new Point(originalX, originalY);
+        */
+        resultPos = findBestNeighbor(image, resultPos);
+        targetX = resultPos.x;
+        targetY = resultPos.y;
+        // Log.d("IroTore", "originX, y, resultX, y=" + originalX + "," + originalY + ", " + targetX + "," + targetY);
+    }
+
+    private Point findBestNeighbor(Bitmap bitmap, Point pos) {
+        return finder.findNearestNeighbor(bitmap, pos);
+    }
+
+
     int targetX = -1;
     int targetY = -1;
     public void setTargetXY(int targetX, int targetY) {
-        this.targetX = targetX;
-        this.targetY = targetY;
+        adjustBestNeighbor(targetX, targetY);
+
         invalidate();
     }
 

@@ -267,7 +267,7 @@ public class IrotoreActivity extends AppCompatActivity {
         console.setText(result);
     }
 
-    private int calculateColorDiff(int selected, int answer) {
+    public static int calculateColorDiff(int selected, int answer) {
         int sr = (selected & 0x00FF0000) >> 16;
         int sg = (selected & 0x0000FF00) >> 8;
         int sb = (selected & 0x000000FF);
@@ -303,7 +303,13 @@ public class IrotoreActivity extends AppCompatActivity {
             Bitmap bitmap = BitmapFactory.decodeStream(is, null, options);
             scenario.setSize(options.outWidth, options.outHeight);
 
-            targetView.setImage(bitmap);
+            try {
+                targetView.setImage(bitmap);
+
+            }catch(IllegalArgumentException e) {
+                showMessage("Too small image.");
+                return;
+            }
             applyCurrentScenario();
             becomeSelectState();
             scoreRecorder.resetCurrentScores();
