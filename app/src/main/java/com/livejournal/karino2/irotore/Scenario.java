@@ -13,4 +13,7 @@ public interface Scenario {
     ScenarioItem getCurrentItem();
 
     void skipCurrent();
+
+    void replaceCurrentToSpecifiedPos(int x, int y);
+
 }

@@ -58,6 +58,12 @@ public class RandomScenario implements Scenario {
     }
 
     @Override
+    public void replaceCurrentToSpecifiedPos(int x, int y) {
+        item.targetX = x;
+        item.targetY = y;
+    }
+
+    @Override
     public void restart() {
         index = 0;
         item = generateRandomItem();

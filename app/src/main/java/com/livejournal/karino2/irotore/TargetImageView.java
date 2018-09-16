@@ -10,8 +10,8 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.SystemClock;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -70,7 +70,10 @@ public class TargetImageView extends View {
 
     }
 
-    Matrix commited = new Matrix();
+    Matrix committed = new Matrix();
+    Matrix tempInvert = new Matrix();
+
+    long downUpTimeMill = -1;
 
 
     @Override
@@ -84,23 +87,24 @@ public class TargetImageView extends View {
                     initialPos = new PointF(event.getX(), event.getY());
                     initialPos2 = new PointF(event.getX(1), event.getY(1));
                 }
+                downUpTimeMill = SystemClock.uptimeMillis();
                 return true;
             case MotionEvent.ACTION_MOVE:
                 if(event.getPointerCount() == 1) {
                     if(initialPos2 != null) {
-                        // mose move ended here.
-                        commited.set(matrix);
+                        // mouse move ended here.
+                        committed.set(matrix);
                         initialPos = null;
                         initialPos2 = null;
                         return true;
                     }
                     if(initialPos == null) {
-                        // already commited.
+                        // already committed.
                         return true;
                     }
                     double distanceX = event.getX() - initialPos.x;
                     double distanceY = event.getY() - initialPos.y;
-                    matrix.set(commited);
+                    matrix.set(committed);
                     matrix.postTranslate((float) distanceX, (float) distanceY);
                     invalidate();
                     return true;
@@ -119,7 +123,7 @@ public class TargetImageView extends View {
                     float cy = getMeasuredHeight()/2.0f;
 
                     float magnify = (float)(cur_distance/init_distance);
-                    matrix.set(commited);
+                    matrix.set(committed);
                     matrix.postScale(magnify, magnify, cx, cy);
                     invalidate();
                     return true;
@@ -128,16 +132,41 @@ public class TargetImageView extends View {
                 if(initialPos == null)
                     return true; // do nothing
                 if(event.getPointerCount() == 1) {
-                    if(distanceSquare(initialPos, event.getX(), event.getY()) < 3) {
-                        // onTap.onClick(this);
+                    if(distanceSquare(initialPos, event.getX(), event.getY()) < 3 &&
+                            isShortEnough(downUpTimeMill, SystemClock.uptimeMillis())) {
+                        matrix.invert(tempInvert);
+                        RectF rect = getImageViewRegion();
+                        float[] posArr = new float[]{event.getX(), event.getY()};
+                        tempInvert.mapPoints(posArr);
+                        if(rect.contains(posArr[0], posArr[1])) {
+                            onTapListener.onTap((float) ((posArr[0] - rect.left) / scale), (float) ((posArr[1] - rect.top) / scale));
+                        }
+
                     }
                 }
-                commited.set(matrix);
+                committed.set(matrix);
                 initialPos = null;
                 initialPos2 = null;
+                downUpTimeMill = -1;
                 return true;
         }
         return super.onTouchEvent(event);
+    }
+
+    public interface OnTapListener {
+        void onTap(float x, float y);
+    }
+
+    OnTapListener onTapListener = (x, y)-> {};
+
+    public void setOnTapkListener(OnTapListener listener) {
+        onTapListener = listener;
+    }
+
+    private boolean isShortEnough(long downUpTimeMill, long current) {
+        if(downUpTimeMill == -1)
+            return false;
+        return current - downUpTimeMill < 500;
     }
 
     private float distanceSquare(PointF from, float x, float y) {

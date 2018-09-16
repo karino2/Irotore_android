@@ -60,6 +60,10 @@ public class IrotoreActivity extends AppCompatActivity {
         scoreRecorder = new ScoreRecorder(getMyPreferences());
 
         targetView = (TargetImageView)findViewById(R.id.targetimage_content);
+        targetView.setOnTapkListener((x, y)-> {
+            scenario.replaceCurrentToSpecifiedPos((int) x, (int) y);
+            applyCurrentScenario();
+        });
 
         handleSendIntent();
         loadScenarioIfNecessaryAndPossible();
